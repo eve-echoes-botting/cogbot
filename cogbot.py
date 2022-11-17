@@ -7,10 +7,8 @@ from logging.handlers import QueueHandler
 import queue
 import sys
 from io import TextIOBase
+from pd.pd import pd
 
-
-DEFAULT_CHANNEL = 987755418744930394
-id4o = 139179662369751041
 
 intents = discord.Intents.default()
 intents.members = True
@@ -24,7 +22,7 @@ class bot4o(commands.Bot):
         super().__init__(command_prefix = '.', intents = intents)
         self.q = queue.Queue()
         self.renameq = queue.Queue()
-        self.id4o = id4o
+        self.pd = pd('cogbot.json')
 
     def stdout(self, msg):
         self.q.put(msg)
@@ -63,8 +61,11 @@ class bot4o(commands.Bot):
         await self.w.start()
         self.msgloop.start()
         self.renameloop.start()
-        await self.send(self.get_channel(int(DEFAULT_CHANNEL)), 'im up')
-        await self.change_presence(activity=discord.Game(name="your string goes here"))
+        try:
+            await self.send(self.get_channel(int(self.pd['default_channel'])), 'im up')
+            await self.change_presence(activity=discord.Game(name="your string goes here"))
+        except:
+            pass
 
     async def on_message(self, message):
         if message.author.bot:
@@ -91,7 +92,10 @@ class bot4o(commands.Bot):
             msg = ctx
             ctx = None
         if ctx == None:
-            ctx = self.get_channel(int(DEFAULT_CHANNEL))
+            try:
+                ctx = self.get_channel(int(self.pd['default_channel']))
+            except:
+                pass
         if isinstance(msg, list):
             for i in msg:
                 await self.send(ctx, i, **args)
@@ -128,10 +132,16 @@ async def hello(ctx):
     await ctx.send("hi, i'm the new bot")
 
 @b.command()
-async def close(ctx):
-    if ctx.author.id == id4o:
+async def myclose(ctx):
+    if ctx.author.id == ctx.guild.owner.id:
         await b.send(ctx, 'im going down')
         await b.close()
+
+@b.command()
+async def set_default_channel(ctx):
+    b.pd['default_channel'] = ctx.channel.id
+    b.pd.sync()
+    await b.send(ctx, f'default  channel set to {ctx.channel.id}')
 
 sys.stderr.write = b.stdout
 sys.stdout.write = b.stdout

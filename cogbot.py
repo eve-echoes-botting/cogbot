@@ -6,7 +6,6 @@ import logging
 from logging.handlers import QueueHandler
 import queue
 import sys
-from io import TextIOBase
 from pd.pd import pd
 
 

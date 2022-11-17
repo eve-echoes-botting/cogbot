@@ -1,0 +1,6 @@
+[submodule "pd"]
+	path = pd
+	url = https://github.com/eve-echoes-botting/pd.git
+[submodule "commands/activity"]
+	path = commands/activity
+	url = https://github.com/eve-echoes-botting/activity_cog.git
